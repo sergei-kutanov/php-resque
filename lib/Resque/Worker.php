@@ -158,6 +158,7 @@ class Resque_Worker
 			}
 
 			// Attempt to find and reserve a job
+            Resque_Event::trigger('beforeJobFind', $this);
 			$job = false;
 			if(!$this->paused) {
 				if($blocking === true) {
@@ -169,6 +170,7 @@ class Resque_Worker
 
 				$job = $this->reserve($blocking, $interval);
 			}
+            Resque_Event::trigger('afterJobFind', $this);
 
 			if(!$job) {
 				// For an interval of 0, break now - helps with unit testing etc
@@ -394,6 +396,15 @@ class Resque_Worker
 		$this->logger->log(Psr\Log\LogLevel::NOTICE, 'CONT received; resuming job processing');
 		$this->paused = false;
 	}
+
+    /**
+     * Returns paused status of the worker
+     * @return bool
+     */
+    public function isPaused()
+    {
+        return $this->paused;
+    }
 
 	/**
 	 * Schedule a worker for shutdown. Will finish processing the current job

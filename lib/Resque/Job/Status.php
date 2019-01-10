@@ -79,6 +79,18 @@ class Resque_Job_Status
 		return true;
 	}
 
+	private static $statusTTL = 86400;
+
+	/**
+     * Override the default statusTTL for update events.
+     *
+     * @param int $ttl number of seconds to keep status around for. Default is 1 day (86400).
+     */
+	public static function setStatusTTL($ttl)
+    {
+        self::$statusTTL = $ttl;
+    }
+
 	/**
 	 * Update the status indicator for the current job with a new status.
 	 *
@@ -98,7 +110,7 @@ class Resque_Job_Status
 
 		// Expire the status for completed jobs after 24 hours
 		if(in_array($status, self::$completeStatuses)) {
-			Resque::redis()->expire((string)$this, 86400);
+			Resque::redis()->expire((string)$this, self::$statusTTL);
 		}
 	}
 
